@@ -1,5 +1,5 @@
 # pylint: disable=invalid-name
-from pydoc import plain
+
 import sys
 
 alphabet = 'abcdefghijklmnopqrstuvwxyzåäö'
