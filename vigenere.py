@@ -3,7 +3,7 @@
 import sys
 
 alphabet = 'abcdefghijklmnopqrstuvwxyzåäö'
-plaintext = "varsågod with spaces"
+plaintext = "DetforsomenpildetflögliktenandsomflyktarförjägarensloddetbrusandebantågKringskogarnesrandettböljandeångmolnstodVisuttoochglammadehjertligtochgladttvåmuntraartisterompojkstreckchsprattVidnärmstastationkomentärnasåskön"
 key = "hej"
 
 key = key.lower()
