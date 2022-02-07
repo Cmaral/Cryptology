@@ -117,12 +117,12 @@ def tryAttack(ciphertext, key_length):
     # using the chi-squared method
     key = ''
     for column in columns:
-        freq_key = -1
+        sum_key = -1
         current_key = ''
         for i in alphabet:
             # For each letter in the Swedish alphabet,
             # decrypt the column using key = i
-            freq_sum = 0
+            chi_sum_column = 0
             shifted_text = decrypt(column, i) # Shift column by letter i
             freq_cipher_shifted = getFrequency(shifted_text) # Letter counts in column shifted by i
             for shifted_letter in freq_cipher_shifted:
@@ -130,14 +130,14 @@ def tryAttack(ciphertext, key_length):
                 freq_cipher = shifted_letter[1] 
                 # Expected letter count of current letter in the shifted text:
                 freq_swedish = (alphabet_frequencies[shifted_letter[0]]/100)*len(column)
-                # Compute chi squared for current letter/key combo and add to the total:
-                freq_sum += (sqrt(abs(freq_cipher-freq_swedish)))/freq_swedish
+                # Compute chi squared for current letter/key combo and add to the total sum for this column:
+                chi_sum_column += (sqrt(abs(freq_cipher-freq_swedish)))/freq_swedish
 
             # If the chi-squared statistic for this column deciphered with the current letter
             # is lower than the previous values, this letter is more likely to be the key
             # for this column
-            if (freq_sum<freq_key or freq_key==-1):
-                freq_key = freq_sum
+            if (chi_sum_column<sum_key or sum_key==-1):
+                sum_key = chi_sum_column
                 current_key = i
 
         # Add the guessed key for the current column
