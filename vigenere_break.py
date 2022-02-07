@@ -2,7 +2,6 @@
 import sys
 from math import sqrt
 
-
 alphabet = 'abcdefghijklmnopqrstuvwxyzåäö'
 # Swedish alphabet frequency table obtained from:
 # http://practicalcryptography.com/cryptanalysis/letter-frequencies-various-languages/swedish-letter-frequencies/
@@ -11,15 +10,15 @@ alphabet_frequencies = {'a': 10.04, 'b': 1.31, 'c': 1.71, 'd': 4.90, 'e': 9.85, 
                         'q': 0.01, 'r': 7.88, 's': 5.32, 't': 8.89, 'u': 1.86, 'v': 2.55, 'w': 0.14, 'x': 0.11,
                         'y': 0.71, 'z': 0.04, 'å': 1.66, 'ä': 2.10, 'ö': 1.50}
 
-min_key_length = 3
-max_key_length = 16
+MIN_KEY_LENGTH = 3
+MAX_KEY_LENGTH = 16
 
 def findFactors(n):
     """
-    Returns a list containing the factors of n between min_key_length and max_key_length
+    Returns a list containing the factors of n between MIN_KEY_LENGTH and MAX_KEY_LENGTH
     """
     factors = []
-    for i in range(min_key_length, max_key_length+1):
+    for i in range(MIN_KEY_LENGTH, MAX_KEY_LENGTH+1):
         if n % i == 0:
             factors.append(i)
     return factors
@@ -131,7 +130,7 @@ def tryAttack(ciphertext, key_length):
                 freq_decrypted = shifted_letter[1]
                 # Expected letter count of current letter in the decrypted text:
                 freq_swedish = (alphabet_frequencies[shifted_letter[0]]/100)*len(column)
-                # Compute chi squared for current letter/key combo and add to total sum for this key:
+                # Compute chi-squared for current letter/key and add to total sum for this key:
                 chi_sum += (sqrt(abs(freq_decrypted-freq_swedish)))/freq_swedish
 
             # If the chi-squared statistic for this column deciphered with the current key
@@ -163,11 +162,9 @@ def decrypt(ciphertext, key):
         for j in key:
             full_key += j
 
-    n = len(ciphertext)
-
     # Shift each letter in the ciphertext by its corresponding
     # key
-    for i in range(n):
+    for i in range(len(ciphertext)):
         x = alphabet.find(ciphertext[i])
         k = alphabet.find(full_key[i])
         x = x - k
@@ -179,21 +176,28 @@ def printTextSeparated(text, space):
     """
     Prints a given text separating it into chunks of size space
     """
-    print("The resulting decrypted text is: ")
-    for i in range(len(text)):
-        print(text[i], end= '')
-        if (i+1)%space==0:
+    print("\nThe resulting decrypted text is: ")
+    for i in enumerate(text):
+        print(i[1], end= '')
+        if (i[0]+1)%space==0:
             print(end = ' ')
-    print()
+    print("\n")
 
 
 def main():
+    """
+    Main function.
+    Offers the user 2 options: guess the key given a ciphertext, or
+    decrypt a ciphertext by providing the key.
+    """
     option = input("Choose option: \n"
-                "1. Try to break cipher without knowing key, \n"
-                "2. Decrypt text given a key \n")
+                "1. Try to guess key and break a Vigenere cipher, \n"
+                "2. Decrypt text with a given key \n")
     if option=='1':
         ciphertext = input("Input ciphertext: ")
         ciphertext = ciphertext.lower()
+
+        print("\nUsing the Kasiski method to guess key length...")
 
         # Kasiski Method
         ## Step 1: Find repeated bigrams and spacing between them
@@ -201,30 +205,31 @@ def main():
 
         ## Step 2: Sort key lengths by how likely they are to be the correct key length
         key_length_list = sortKeyLengths(all_factors)
-        print("\nList of possible key lengths and their number of appearances:")
+        print("List of possible key lengths and their number of appearances (length, appearances):")
         print(key_length_list)
 
         ## Step 3: Try key lengths starting by the most possible one
         key = ''
         for i in key_length_list:
             key_length = i[0]
-            answer = input("\nTry to hack with key length " + str(key_length) + "? (Y/N) ")
-            if answer in ('Y', 'y', 'yes', 'Yes', 'YES', ''):
+            answer = input("\nTry to hack with key length " + str(key_length) + "? (Y/N/Exit) ").lower()
+            if answer in ('y', 'yes', ''):
                 key = tryAttack(ciphertext, key_length) 
                 print("\nKey obtained: " + key)
                 plaintext = decrypt(ciphertext, key)
                 printTextSeparated(plaintext, key_length)
+            elif answer in ('exit', 'e'):
+                sys.exit()
             else:
                 pass
 
     if option=='2':
         ciphertext = input("Input ciphertext: ")
-        key = input("\nInput key: (input E to exit) ")
+        key = input("\nInput key: (input E to exit) ").lower()
         while key not in ('e', 'E'):
-            key = key.lower()
             plaintext = decrypt(ciphertext, key)
             printTextSeparated(plaintext, len(key))
-            key = input("\nInput key: (input E to exit) ")
+            key = input("\nInput key: (input E to exit) ").lower()
     else:
         pass
 
